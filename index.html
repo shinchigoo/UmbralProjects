@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111910">
+<title>Umbral · El gremio</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#101710;color:#f5e3ba;font-family:monospace;overflow:hidden}#game{position:fixed;inset:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}canvas{width:100%;height:100%;display:block;touch-action:none;outline:none}#loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;background:#101710;z-index:3}h1{font-size:clamp(34px,7vw,70px);letter-spacing:8px;margin:0 0 18px;color:#edcb85;text-shadow:4px 4px #513f25}p{font-size:16px;line-height:1.5;max-width:520px}progress{width:min(340px,80vw);height:22px;accent-color:#8cac71}button{font:inherit;color:#ffe5b0;border:3px solid #b28b4e;background:#263a2b;padding:14px 24px;cursor:pointer}#reload{display:none;margin-top:18px}#fullscreen{position:absolute;right:10px;bottom:5px;z-index:2;padding:5px 9px;font-size:12px;opacity:.7}#fullscreen:focus{opacity:1}@media(pointer:coarse){#fullscreen{display:none}} 
+</style>
+</head>
+<body>
+<main id="game">
+<canvas id="unity-canvas" tabindex="0" aria-label="Umbral, juego de hábitos y mazmorras"></canvas>
+<section id="loading" aria-live="polite"><h1>UMBRAL</h1><p id="status">Preparando el gremio…</p><progress id="progress" value="0" max="1"></progress><p>Juega en horizontal.<br>Palanca izquierda para moverte; botón derecho para dash.</p><button id="reload" type="button">VOLVER A INTENTAR</button></section>
+<button id="fullscreen" type="button" hidden>PANTALLA COMPLETA</button>
+</main>
+<script>
+const canvas=document.getElementById('unity-canvas');
+const loading=document.getElementById('loading');
+const statusText=document.getElementById('status');
+const progress=document.getElementById('progress');
+const reload=document.getElementById('reload');
+const fullscreen=document.getElementById('fullscreen');
+function failed(){loading.style.display='flex';progress.hidden=true;statusText.textContent='No pudimos abrir el juego. Revisa tu conexión y vuelve a intentarlo. Si continúa, prueba con Safari o Chrome actualizado.';reload.style.display='block';}
+reload.addEventListener('click',()=>location.reload());
+const config={
+ dataUrl:'Build/Umbral-Web-20260915-202815.data.unityweb',
+ frameworkUrl:'Build/Umbral-Web-20260915-202815.framework.js.unityweb',
+ codeUrl:'Build/Umbral-Web-20260915-202815.wasm.unityweb',
+ streamingAssetsUrl:'StreamingAssets',
+ companyName:"DefaultCompany",
+ productName:"Umbral",
+ productVersion:"1.0",
+ devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),
+ matchWebGLToCanvasSize:true,
+ showBanner:(message,type)=>{if(type==='error')failed();}
+};
+const script=document.createElement('script');
+script.src='Build/Umbral-Web-20260915-202815.loader.js';script.onerror=failed;
+script.onload=()=>{
+ createUnityInstance(canvas,config,value=>{progress.value=value;statusText.textContent='Abriendo el gremio… '+Math.round(value*100)+'%';})
+ .then(instance=>{loading.style.display='none';fullscreen.hidden=!document.fullscreenEnabled;fullscreen.addEventListener('click',()=>instance.SetFullscreen(1));})
+ .catch(failed);
+};
+document.body.appendChild(script);
+</script>
+</body>
+</html>
